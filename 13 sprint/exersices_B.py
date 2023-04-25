@@ -14,36 +14,52 @@
 
 """
 from typing import List
+from dataclasses import dataclass
 
 
-def input_data() -> List[dict]:
+@dataclass
+class Member:
+    """Участник соревнования."""
+    name: str
+    n_exersices: int
+    penalty: int
+
+    def __gt__(self, other):
+        """Сравнеие двух элементов."""
+        if self.n_exersices > other.n_exersices:
+            return True
+        if self.n_exersices < other.n_exersices:
+            return False
+        if self.penalty < other.penalty:
+            return True
+        if self.penalty > other.penalty:
+            return False
+        return self.name < other.name
+
+    def __lt__(self, other):
+        """Сравнеие двух элементов."""
+        if self.n_exersices < other.n_exersices:
+            return True
+        if self.n_exersices > other.n_exersices:
+            return False
+        if self.penalty > other.penalty:
+            return True
+        if self.penalty < other.penalty:
+            return False
+        return self.name > other.name
+
+
+def input_data() -> List[Member]:
     """Получение исходные данные."""
     n_line = int(input())
     array = [None] * n_line
     for k_line in range(n_line):
         name, n_exersices, penalty = input().split()
-        array[k_line] = {'name': name,
-                         'n_exersices': int(n_exersices),
-                         'penalty': int(penalty)}
+        array[k_line] = Member(name, int(n_exersices), int(penalty))
     return array
 
 
-def is_more(item_1, item_2) -> bool:
-    """Сравнеие двух элементов.
-    Если item_1 > item_2, то True.
-    """
-    if item_1['n_exersices'] > item_2['n_exersices']:
-        return True
-    if item_1['n_exersices'] < item_2['n_exersices']:
-        return False
-    if item_1['penalty'] < item_2['penalty']:
-        return True
-    if item_1['penalty'] > item_2['penalty']:
-        return False
-    return item_1['name'] < item_2['name']
-
-
-def quick_sort(array, left=0, right=None):
+def quick_sort(members, left=0, right=None):
     """Быстрая сортировка.
 
     Аллгоритм:
@@ -60,19 +76,19 @@ def quick_sort(array, left=0, right=None):
     То же происходит с элементами после опорного.
     """
     if right is None:
-        right = len(array) - 1
+        right = len(members) - 1
 
     empty_index = right
-    pivot = array[empty_index]
+    pivot = members[empty_index]
 
     first, last = left - 1, right
 
     while True:
         while first < last:
             first += 1
-            if is_more(array[first], pivot):
+            if members[first] > pivot:
                 continue
-            array[empty_index] = array[first]
+            members[empty_index] = members[first]
             empty_index = first
             break
         else:
@@ -80,22 +96,22 @@ def quick_sort(array, left=0, right=None):
 
         while first < last:
             last -= 1
-            if not is_more(array[last], pivot):
+            if members[last] < pivot:
                 continue
-            array[empty_index] = array[last]
+            members[empty_index] = members[last]
             empty_index = last
             break
         else:
             break
-    array[empty_index] = pivot
+    members[empty_index] = pivot
 
     if empty_index - left > 1:
-        quick_sort(array, left, empty_index - 1)
+        quick_sort(members, left, empty_index - 1)
     if right - empty_index > 1:
-        quick_sort(array, empty_index + 1, right)
+        quick_sort(members, empty_index + 1, right)
 
 
-def quick_sort2(array, left=0, right=None):
+def quick_sort2(members, left=0, right=None):
     """Быстрая сортировка.
 
     То же самое, что quick().
@@ -105,9 +121,9 @@ def quick_sort2(array, left=0, right=None):
         """Проверяем один элемент при направление слева направа."""
         nonlocal first, empty_index
         first += 1
-        if is_more(array[first], pivot):
+        if members[first] > pivot:
             return go_from_left_to_right
-        array[empty_index] = array[first]
+        members[empty_index] = members[first]
         empty_index = first
         return go_from_right_to_left
 
@@ -115,17 +131,17 @@ def quick_sort2(array, left=0, right=None):
         """Проверяем один элемент при направление слева направа."""
         nonlocal last, empty_index
         last -= 1
-        if not is_more(array[last], pivot):
+        if members[last] < pivot:
             return go_from_right_to_left
-        array[empty_index] = array[last]
+        members[empty_index] = members[last]
         empty_index = last
         return go_from_left_to_right
 
     if right is None:
-        right = len(array) - 1
+        right = len(members) - 1
 
     empty_index = right
-    pivot = array[empty_index]
+    pivot = members[empty_index]
 
     first, last = left - 1, right
 
@@ -133,23 +149,23 @@ def quick_sort2(array, left=0, right=None):
 
     while first < last:
         go_step = go_step()
-    array[empty_index] = pivot
+    members[empty_index] = pivot
 
     if empty_index - left > 1:
-        quick_sort2(array, left, empty_index - 1)
+        quick_sort2(members, left, empty_index - 1)
     if right - empty_index > 1:
-        quick_sort2(array, empty_index + 1, right)
+        quick_sort2(members, empty_index + 1, right)
 
 
-def output(records: List[dict]):
-    for record in records:
-        print(record['name'])
+def output(members: List[Member]):
+    for member in members:
+        print(member.name)
 
 
 def main():
-    records = input_data()
-    quick_sort2(records)
-    output(records)
+    members = input_data()
+    quick_sort(members)
+    output(members)
 
 
 if __name__ == '__main__':
