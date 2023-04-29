@@ -38,66 +38,30 @@ def min_distance_big_memory(areas: List[int], k_distance: int = 1):
     return distances[k_distance - 1]
 
 
-def min_distance4(areas: List[int], k_distance: int = 1):
-    """Поиск min разницы между островами."""
-    counter = {}
-    for i_area, area1 in enumerate(areas[:-1]):
-        for area2 in areas[i_area+1:]:
-            distance = abs(area1 - area2)
-            if distance in counter:
-                counter[distance] += 1
-            else:
-                counter[distance] = 1
-    counter = sorted(counter.items(), key=lambda x: x[0])
-    result = 0
-    for key, value in counter:
-        result += value
-        if result >= k_distance:
-            return key
-
-
-def adding_item(array: List[int], element: int) -> bool:
-    """Элемент добавляется по ранжиру.
-    Если последний элемент меньше, чем element, то False.
-    """
-    k_item = len(array) - 1
-    if element > array[k_item]:
-        return False
-    while k_item:
-        if element >= array[k_item - 1]:
+def update_destances(counter: dict, k_dist: int, minimum: int):
+    """Определение значение первых k_dist минимальных чисел."""
+    keys = (sorted(counter.keys()))
+    k_key = 0
+    while True:
+        key_pred = keys[k_key]
+        value_pred = counter[key_pred]
+        k_key += 1
+        if k_dist <= value_pred:
+            result = key_pred
             break
-        array[k_item] = array[k_item - 1]
-        k_item -= 1
-    array[k_item] = element
-    return True
+        key_next = keys[k_key]
+        if key_next > minimum:
+            k_dist -= value_pred
+            continue
+        counter[key_next] += value_pred
+        del counter[key_pred]
+    while k_key < len(keys):
+        del counter[keys[k_key]]
+        k_key += 1
+    return result
 
 
-def min_distance3(areas: List[int], k_distance: int = 1):
-    """Поиск min разницы между островами.
-
-    Сортируем O(log(n)). и идем O(?) -> O(n) -
-                                чем дальше, что будет проверять один элемент.
-        0   1   2   3   4   5   6
-    0   *
-    1   1   *
-    2   3   2   *
-    3   6   5   4   *
-    4  10   9   8   7   *
-    5  15  14  13  12  11   *
-    6  21  20  19  18  17  16   *
-    сортировка O(k_distance * n)
-    если k_distance большое - горлышко.
-    """
-    areas.sort()
-    distances = [areas[-1]] * k_distance
-    for i in range(1, len(areas)):
-        for j in range(i-1, -1, -1):
-            if not adding_item(distances, areas[i] - areas[j]):
-                break
-    return distances[-1]
-
-
-def min_distance6(areas: List[int], k_distance: int = 1):
+def min_distance(areas: List[int], k_distance: int = 1):
     """Поиск min разницы между островами.
 
     Сортируем O(log(n)). и идем O(?) -> O(n) -
@@ -112,42 +76,69 @@ def min_distance6(areas: List[int], k_distance: int = 1):
     6  21  20  18  15  11   6   *
     сортировка O(k_distance * n)
     если k_distance большое - горлышко.
-    distances нужно делать словарем. Как проверять, что уже большие величины?
     """
     areas.sort()
-    distances = [areas[-1]] * k_distance
-    for i in range(1, len(areas)):
+    result = areas[-1]
+    n = len(areas)
+    distances = {}
+    lines_from_k_distance = math.ceil(
+        (2*n - 1 - math.sqrt(4*n*n - 4*n + 1 - 8*k_distance))/2
+    )
+    for i in range(1, lines_from_k_distance):    
         for j in range(0, len(areas)-i):
-            print(i + j, j)
-    return distances[-1]
+            distance = areas[i+j] - areas[j]
+            if distance in distances:
+                distances[distance] += 1
+            else:
+                distances[distance] = 1
+
+    for i in range(lines_from_k_distance, len(areas)):
+        min_pass = areas[-1]
+        for j in range(0, len(areas)-i):
+            distance = areas[i+j] - areas[j]
+            if distance >= result:
+                continue
+            if distance < min_pass:
+                min_pass = distance
+            if distance in distances:
+                distances[distance] += 1
+            else:
+                distances[distance] = 1
+        # min_pass полученных после прохода. В следующим проходе не могут
+        # быть значения ниже этого. Можно засуммировать значения с 
+        # маленькими ключами. Если полученные результаты минимум остравов
+    # ниже min_pass, то следует прекратить. результаты не изменятся.
+        result = update_destances(distances, k_distance, min_pass)
+        if result <= min_pass:
+            return result
+    return result
 
 
-def get_limit_min(counter: dict, k_number: int):
-    """Определение значение первых k_number минимальных чисел."""
-    myiter = iter(sorted(counter.items(), key=lambda x: x[0]))
+
+def update_destances2(counter: dict, k_dist: int, minimum: int):
+    """Определение значение первых k_dist минимальных чисел."""
+    keys = (sorted(counter.keys()))
+    k_key = 0
     while True:
-        key, value = next(myiter)
-        if k_number <= value:
-            result = key
+        key_pred = keys[k_key]
+        value_pred = counter[key_pred]
+        k_key += 1
+        if k_dist <= value_pred:
+            result = key_pred
             break
-        k_number -= value
-    try:
-        while True:
-            key, _ = next(myiter)
-            del counter[key]
-    except StopIteration:
-        return result
+        key_next = keys[k_key]
+        if key_next > minimum:
+            k_dist -= value_pred
+            continue
+        counter[key_next] += value_pred
+        del counter[key_pred]
+    while k_key < len(keys):
+        del counter[keys[k_key]]
+        k_key += 1
+    return result
 
 
-def get_limit_min2(counter: dict, k_number: int):
-    """Определение значение первых k_number минимальных чисел."""
-    for key, value in sorted(counter.items(), key=lambda x: x[0]):
-        if k_number <= value:
-            return key
-        k_number -= value
-
-
-def min_distance(areas: List[int], k_distance: int = 1):
+def min_distance2(areas: List[int], k_distance: int = 1):
     """Поиск min разницы между островами.
 
     Сортируем O(log(n)). и идем O(?) -> O(n) -
@@ -155,38 +146,49 @@ def min_distance(areas: List[int], k_distance: int = 1):
         0   1   2   3   4   5   6
     0   *
     1   1   *
-    2   3   2   *
-    3   6   5   4   *
-    4  10   9   8   7   *
-    5  15  14  13  12  11   *
-    6  21  20  19  18  17  16   *
+    2   7   2   *
+    3  12   8   3   *
+    4  16  13   9   4   *
+    5  19  17  14  10   5   *
+    6  21  20  18  15  11   6   *
     сортировка O(k_distance * n)
     если k_distance большое - горлышко.
     """
-    LINES_NOT_CHECK = 1
-    lines_from_k_distance = math.ceil((math.sqrt(8*k_distance - 1) - 1)/2) + 1
     areas.sort()
+    result = areas[-1]
+    n = len(areas)
     distances = {}
-    max_i = min(len(areas), max(lines_from_k_distance, LINES_NOT_CHECK))
-    for i in range(1, max_i):
-        for j in range(i-1, -1, -1):
-            distance = areas[i] - areas[j]
+    lines_from_k_distance = math.ceil(
+        (2*n - 1 - math.sqrt(4*n*n - 4*n + 1 - 8*k_distance))/2
+    )
+    for i in range(1, lines_from_k_distance):    
+        for j in range(0, len(areas)-i):
+            distance = areas[i+j] - areas[j]
             if distance in distances:
                 distances[distance] += 1
             else:
                 distances[distance] = 1
 
-    for i in range(max_i, len(areas)):
-        limit = get_limit_min(distances, k_distance)
-        for j in range(i-1, -1, -1):
-            distance = areas[i] - areas[j]
-            if distance >= limit:
-                break
+    for i in range(lines_from_k_distance, len(areas)):
+        min_pass = areas[-1]
+        for j in range(0, len(areas)-i):
+            distance = areas[i+j] - areas[j]
+            if distance >= result:
+                continue
+            if distance < min_pass:
+                min_pass = distance
             if distance in distances:
                 distances[distance] += 1
             else:
                 distances[distance] = 1
-    return get_limit_min(distances, k_distance)
+        # min_pass полученных после прохода. В следующим проходе не могут
+        # быть значения ниже этого. Можно засуммировать значения с 
+        # маленькими ключами. Если полученные результаты минимум остравов
+    # ниже min_pass, то следует прекратить. результаты не изменятся.
+        result = update_destances2(distances, k_distance, min_pass)
+        if result <= min_pass:
+            return result
+    return result
 
 
 def main():
@@ -223,9 +225,9 @@ def test():
              53090, 292722, 577351, 115003, 219214, 598154, 413976, 791026,
              306175, 941587, 465380, 462470, 933341, 135508, 483309, 318573,
              758842, 632249, 688815, 602873]
-#    areas = [1, 3, 8, 5, 5, 12, 5]
-    print(min_distance(areas, 5), min_distance_big_memory(areas, 5))
+    # areas = [1, 3, 8, 5, 5, 12, 5]
+    print(min_distance_big_memory(areas, 5466), min_distance2(areas, 5466))
 
 
 if __name__ == '__main__':
-    main()
+    test()
