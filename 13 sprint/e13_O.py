@@ -38,7 +38,7 @@ def min_distance_big_memory(areas: List[int], k_distance: int = 1):
     return distances[k_distance - 1]
 
 
-def update_destances(counter: dict, k_dist: int, minimum: int):
+def update_destances(counter: dict, k_dist: int):
     """Определение значение первых k_dist минимальных чисел."""
     keys = (sorted(counter.keys()))
     k_key = 0
@@ -50,11 +50,7 @@ def update_destances(counter: dict, k_dist: int, minimum: int):
             result = key_pred
             break
         key_next = keys[k_key]
-        if key_next > minimum:
-            k_dist -= value_pred
-            continue
-        counter[key_next] += value_pred
-        del counter[key_pred]
+        k_dist -= value_pred    
     while k_key < len(keys):
         del counter[keys[k_key]]
         k_key += 1
@@ -112,7 +108,7 @@ def min_distance(areas: List[int], k_distance: int = 1):
             k_distance -= (2*n - i) * (i - 1) // 2
             break
 
-    result = update_destances(distances, k_distance, min_pass)
+    result = update_destances(distances, k_distance)
     for i in range(lines_from_k_distance + 1, len(areas)):
         min_pass = areas[-1]
         for j in range(0, len(areas)-i):
@@ -129,7 +125,7 @@ def min_distance(areas: List[int], k_distance: int = 1):
         # быть значения ниже этого. Можно засуммировать значения с
         # маленькими ключами. Если полученные результаты минимум остравов
         # ниже min_pass, то следует прекратить. результаты не изменятся.
-        result = update_destances(distances, k_distance, min_pass)
+        result = update_destances(distances, k_distance)
         if result <= min_pass:
             return result
     return result
@@ -268,4 +264,4 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    main()
