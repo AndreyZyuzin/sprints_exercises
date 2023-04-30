@@ -78,21 +78,42 @@ def min_distance(areas: List[int], k_distance: int = 1):
     если k_distance большое - горлышко.
     """
     areas.sort()
+    min_pass = areas[-1]
     result = areas[-1]
     n = len(areas)
     distances = {}
     lines_from_k_distance = math.ceil(
         (2*n - 1 - math.sqrt(4*n*n - 4*n + 1 - 8*k_distance))/2
     )
-    for i in range(1, lines_from_k_distance):    
+
+    for j in range(0, len(areas) - lines_from_k_distance):
+        distance = areas[lines_from_k_distance+j] - areas[j]
+        if distance < min_pass:
+            min_pass = distance
+        if distance in distances:
+            distances[distance] += 1
+        else:
+            distances[distance] = 1
+
+    for i in range(lines_from_k_distance - 1, 0, -1):
+        max_pass = 0
         for j in range(0, len(areas)-i):
             distance = areas[i+j] - areas[j]
+            if distance <= min_pass:
+                distances[min_pass] += 1
+                continue
+            if distance > max_pass:
+                max_pass = distance
             if distance in distances:
                 distances[distance] += 1
             else:
                 distances[distance] = 1
+        if max_pass <= min_pass:
+            k_distance -= (2*n - i) * (i - 1) // 2
+            break
 
-    for i in range(lines_from_k_distance, len(areas)):
+    result = update_destances(distances, k_distance, min_pass)
+    for i in range(lines_from_k_distance + 1, len(areas)):
         min_pass = areas[-1]
         for j in range(0, len(areas)-i):
             distance = areas[i+j] - areas[j]
@@ -105,14 +126,13 @@ def min_distance(areas: List[int], k_distance: int = 1):
             else:
                 distances[distance] = 1
         # min_pass полученных после прохода. В следующим проходе не могут
-        # быть значения ниже этого. Можно засуммировать значения с 
+        # быть значения ниже этого. Можно засуммировать значения с
         # маленькими ключами. Если полученные результаты минимум остравов
-    # ниже min_pass, то следует прекратить. результаты не изменятся.
+        # ниже min_pass, то следует прекратить. результаты не изменятся.
         result = update_destances(distances, k_distance, min_pass)
         if result <= min_pass:
             return result
     return result
-
 
 
 def update_destances2(counter: dict, k_dist: int, minimum: int):
@@ -155,21 +175,34 @@ def min_distance2(areas: List[int], k_distance: int = 1):
     если k_distance большое - горлышко.
     """
     areas.sort()
-    result = areas[-1]
+    result = min_pass = areas[-1]
     n = len(areas)
     distances = {}
     lines_from_k_distance = math.ceil(
         (2*n - 1 - math.sqrt(4*n*n - 4*n + 1 - 8*k_distance))/2
     )
-    for i in range(1, lines_from_k_distance):    
+    for j in range(0, len(areas) - (lines_from_k_distance)):
+        distance = areas[lines_from_k_distance+j] - areas[j]
+        if distance < min_pass:
+            min_pass = distance
+        if distance in distances:
+            distances[distance] += 1
+        else:
+            distances[distance] = 1
+
+    for i in range(1, lines_from_k_distance):
         for j in range(0, len(areas)-i):
             distance = areas[i+j] - areas[j]
+            if distance <= min_pass:
+                distances[min_pass] += 1
+                continue
             if distance in distances:
                 distances[distance] += 1
             else:
                 distances[distance] = 1
 
-    for i in range(lines_from_k_distance, len(areas)):
+    result = update_destances2(distances, k_distance, min_pass)
+    for i in range(lines_from_k_distance + 1, len(areas)):
         min_pass = areas[-1]
         for j in range(0, len(areas)-i):
             distance = areas[i+j] - areas[j]
@@ -182,9 +215,9 @@ def min_distance2(areas: List[int], k_distance: int = 1):
             else:
                 distances[distance] = 1
         # min_pass полученных после прохода. В следующим проходе не могут
-        # быть значения ниже этого. Можно засуммировать значения с 
+        # быть значения ниже этого. Можно засуммировать значения с
         # маленькими ключами. Если полученные результаты минимум остравов
-    # ниже min_pass, то следует прекратить. результаты не изменятся.
+        # ниже min_pass, то следует прекратить. результаты не изменятся.
         result = update_destances2(distances, k_distance, min_pass)
         if result <= min_pass:
             return result
@@ -225,8 +258,13 @@ def test():
              53090, 292722, 577351, 115003, 219214, 598154, 413976, 791026,
              306175, 941587, 465380, 462470, 933341, 135508, 483309, 318573,
              758842, 632249, 688815, 602873]
-    # areas = [1, 3, 8, 5, 5, 12, 5]
-    print(min_distance_big_memory(areas, 5466), min_distance2(areas, 5466))
+    k = 5466
+    # areas = [1, 3, 8, 5, 5, 12, 5]; k = 15
+    # areas = [21, 97, 54, 59, 97, 36, 51, 99, 77, 99, 76, 75, 13, 73, 86, 21, 27, 29, 55, 57]; k = 125
+    # k, areas = 400, [303, 977, 983, 158, 50, 152, 155, 468, 633, 154, 100, 581, 142, 512, 338, 510, 424, 932, 417, 487, 928, 122, 385, 772, 664, 597, 941, 633, 105, 991, 182, 321, 309, 184, 401]
+
+
+    print(min_distance_big_memory(areas, k), min_distance(areas, k))
 
 
 if __name__ == '__main__':
