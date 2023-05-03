@@ -22,17 +22,13 @@ def get_varied_substring(word: str) -> int:
                 result = end - begin
             continue
         while True:
-            if word[begin] == char:
-                begin += 1
+            char_begin = word[begin]
+            begin += 1
+            if char_begin == char:
                 end += 1
                 break
-            tmp.remove(word[begin])
-            begin += 1
+            tmp.remove(char_begin)
     return result
-
-
-
-
 
 
 def test():
@@ -44,15 +40,10 @@ def test():
     assert get_varied_substring('bbbbb') == 1
 
 
-
-
 def main():
-    a, m, s, arr = input_data()
-    word = String2(s, a, m)
-    for begin, end in arr:
-        # print(begin, end, hash(s[begin-1:end], a, m), end=' ')
-        print(word._hash_sub(begin, end))
+    s = input_data()
+    print(get_varied_substring(s))
 
 
 if __name__ == '__main__':
-    test()
+    main()
