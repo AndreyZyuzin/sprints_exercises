@@ -44,8 +44,6 @@ class String2:
             self.__hash_pow[i] = self.__hash_pow[i - 1] * self.__a % self.__m
 
     def _hash_sub(self, left: int, right: int) -> int:
-        left -= 1
-        right -= 1
         result = self.__hash[right]
         if left:
             result -= self.__hash[left-1] * self.__hash_pow[right - left + 1]
@@ -53,7 +51,7 @@ class String2:
 
     def is_sub_word(self, word: str) -> bool:
         """Проверка, что word входит в текущее строку."""
-        for index in range(len(self) - len(word) + 2):
+        for index in range(len(self) - len(word) + 1):
             if self.hash(word) == self._hash_sub(index, index + len(word) - 1):
                 return True
         return False
@@ -77,18 +75,15 @@ def line_to_string(line: str) -> String2:
 
 
 def get_length_subword(word1, word2) -> int:
-    if word1.is_sub_word(word2):
-        return len(word2)
+    if len(word1) < len(word2):
+        word1, word2 = String2(word2), word1
+    else:
+        word1, word2 = String2(word1), word2
 
-    for l in range(1, len(word2)):
-        w1 = word2[l:]
-        w2 = word2[:-l]
-        if word1.is_sub_word(w1) or word1.is_sub_word(w2):
-            return len(word2) - l
-
-#    for l in range(1, len(word2)):
-#        if word1.is_sub_word(word2[l:]) or word1.is_sub_word(word2[:-l]):
-#            return len(word2) - l
+    for item1 in range(len(word2)):
+        for item2 in range(item1 + 1):
+            if word1.is_sub_word(word2[item2:item2 + len(word2) - item1]):
+                return len(word2) - item1
     return 0
 
 
@@ -100,25 +95,29 @@ def test():
     line1, line2 = '61 62 63 64 65', '64 65 69'
     word1 = line_to_string(line1)
     word2 = line_to_string(line2)
-    word1 = 'defghada'
-    word2 = 'abcdefgh'
-    if len(word1) > len(word2):
-        word1, word2 = String2(word1), word2
-    else:
-        word1, word2 = String2(word2), word1
+    # word1 = 'bacdefgaa'
+    # word2 = 'abcdefg'
     print(get_length_subword(word1, word2))
+
+def test2():
+    word = String2('abcdef')
+    # print(word._String2__hash)
+    # print(word.hash('cde'))
+    # print(word._hash_sub(2, 4))
+    assert word.hash('a') == word._hash_sub(0, 0)
+    assert word.hash('b') == word._hash_sub(1, 1)
+    assert word.hash('f') == word._hash_sub(5, 5)
+    assert word.hash('abc') == word._hash_sub(0, 2)
+    assert word.hash('cde') == word._hash_sub(2, 4)
+    assert word.hash('cdef') == word._hash_sub(2, 5)
 
 
 def main():
     line1, line2 = input_data()
     word1 = line_to_string(line1)
     word2 = line_to_string(line2)
-    if len(word1) > len(word2):
-        word1, word2 = String2(word1), word2
-    else:
-        word1, word2 = String2(word2), word1
     print(get_length_subword(word1, word2))
 
 
 if __name__ == '__main__':
-    test()
+    main()
