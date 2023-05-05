@@ -27,7 +27,7 @@ def input_data():
 
 
 class String2:
-    def __init__(self, word: str, koef_a: int = 1000, koef_m: int = 1000009):
+    def __init__(self, word: str, koef_a: int = 1000, koef_m: int = 99990001):
         self.word = word
         self.__a = koef_a
         self.__m = koef_m
@@ -76,14 +76,16 @@ def line_to_string(line: str) -> String2:
 
 def get_length_subword(word1, word2) -> int:
     if len(word1) < len(word2):
-        word1, word2 = String2(word2), word1
+        word1, word2 = String2(word2), String2(word1)
     else:
-        word1, word2 = String2(word1), word2
+        word1, word2 = String2(word1), String2(word2)
 
-    for item1 in range(len(word2)):
-        for item2 in range(item1 + 1):
-            if word1.is_sub_word(word2[item2:item2 + len(word2) - item1]):
-                return len(word2) - item1
+    for len2 in range(len(word2), 0, -1):
+        for shift2 in range(len(word2) - len2 + 1):
+            h2 = word2._hash_sub(shift2, shift2 + len2 - 1)
+            for shift1 in range(len(word1) - len2 + 1):
+                if h2 == word1._hash_sub(shift1, shift1 + len2 - 1):
+                    return len2
     return 0
 
 
@@ -95,8 +97,8 @@ def test():
     line1, line2 = '61 62 63 64 65', '64 65 69'
     word1 = line_to_string(line1)
     word2 = line_to_string(line2)
-    # word1 = 'bacdefgaa'
-    # word2 = 'abcdefg'
+    word1 = 'ab'
+    word2 = 'abcdefg'
     print(get_length_subword(word1, word2))
 
 def test2():
@@ -110,6 +112,17 @@ def test2():
     assert word.hash('abc') == word._hash_sub(0, 2)
     assert word.hash('cde') == word._hash_sub(2, 4)
     assert word.hash('cdef') == word._hash_sub(2, 5)
+    assert get_length_subword('abcdefg', 'abcdefg') == 7
+    assert get_length_subword('ab', 'abcdefg') == 2
+    assert get_length_subword('asabfa', 'abcdefg') == 2
+    assert get_length_subword('ascdeja', 'abcdefg') == 3
+    assert get_length_subword('asefgja', 'abcdefg') == 3
+    assert get_length_subword('defg', 'abcdefg') == 4
+    assert get_length_subword('abcdefg', 'ab') == 2
+    assert get_length_subword('abcdefg', 'asabfa') == 2
+    assert get_length_subword('abcdefg', 'ascdeja') == 3
+    assert get_length_subword('abcdefg', 'asefgja') == 3
+    assert get_length_subword('abcdefg', 'defg') == 4
 
 
 def main():
@@ -120,4 +133,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test2()
