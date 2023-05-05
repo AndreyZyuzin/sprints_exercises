@@ -89,9 +89,18 @@ def get_length_subword(word1, word2) -> int:
     return 0
 
 
-def output(res: bool):
-    print('YES' if res else 'NO')
-
+def get_length_subword2(word1, word2) -> int:
+    """Поиск самой длинной подстроки входит в две строки.
+    
+    Аллгоритм:
+    - обе строки делим на части.
+        'абсд' и 'бадаф' -> нет с, нет ф-> (аб, д) (бада)
+        если не пустые списки, то max_len = 1.
+    - если есть буквенные, то их удаляем.
+    - части ставим по ранжиру по длине.
+    - рекурсивно для всех пар.
+    Если ничего не разделили?
+    """
 
 def test():
     line1, line2 = '61 62 63 64 65', '64 65 69'
@@ -99,7 +108,7 @@ def test():
     word2 = line_to_string(line2)
     word1 = 'ab'
     word2 = 'abcdefg'
-    print(get_length_subword(word1, word2))
+    print(get_length_subword2(word1, word2))
 
 def test2():
     word = String2('abcdef')
@@ -133,4 +142,4 @@ def main():
 
 
 if __name__ == '__main__':
-    test2()
+    test()
