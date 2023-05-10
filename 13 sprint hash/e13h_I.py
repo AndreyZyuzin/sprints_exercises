@@ -30,16 +30,9 @@ def get_numbers(line: str) -> list:
     return list(map(int, line.split()))
 
 
-def get_dict_index(arr: list) -> dict:
+def get_indexes(arr: list, value: int) -> list:
     """Получаем для всех значений массива свои индексы."""
-    result = dict()
-    for index, item in enumerate(arr):
-        if item in result:
-            result[item].append(index)
-        else:
-            result[item] = [index]
-    return result
-
+    return [index for index, item in enumerate(arr) if item == value]
 
 def get_length_sequence(arr1, arr2, current_max=0) -> int:
     """Получаем саммую длинную последовательность в обоих массивах."""
@@ -47,10 +40,10 @@ def get_length_sequence(arr1, arr2, current_max=0) -> int:
         return current_max
     if len(arr1) < len(arr2):
         arr1, arr2 = arr2, arr1
-    counter2 = get_dict_index(arr2)
     middle1 = len(arr1) // 2
-    if arr1[middle1] in counter2:
-        for item in counter2[arr1[middle1]]:
+    items = get_indexes(arr2, arr1[middle1])
+    if items:
+        for item in items:
             len_right = 1
             while (item+len_right < len(arr2)
                    and middle1+len_right < len(arr1)
@@ -98,8 +91,10 @@ def test():
 
 def main():
     line1, line2 = input_data()
+    arr1, arr2 = get_numbers(line1), get_numbers(line2)
+    print(get_length_sequence(arr1, arr2))
 
 
 
 if __name__ == '__main__':
-    test()
+    main()
