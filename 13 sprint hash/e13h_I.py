@@ -30,12 +30,26 @@ def get_numbers(line: str) -> list:
     return list(map(int, line.split()))
 
 
-def get_indexes(arr: list, value: int) -> list:
-    """Получаем для всех значений массива свои индексы."""
-    return [index for index, item in enumerate(arr) if item == value]
-
 def get_length_sequence(arr1, arr2, current_max=0) -> int:
-    """Получаем саммую длинную последовательность в обоих массивах."""
+    """Получаем саммую длинную последовательность в обоих массивах.
+    
+    1. преобразуем новый массив (против 1, 1, ......):
+    4 4 6 2 4 4 4 3 3 -> (4, 2) 6 2 (4, 3) (3, 2)
+    2. Новый массив добавляем словарь:
+    ->  value: [кол-во в последовательности, (место, кол-во подряд, следующий)]
+        4: [2, (0, 2, pointer) -> (3, 3, None)]
+        6: [1, (1, 1, None)]
+        2: [1, (2, 1, None)]
+        3: [1, (4, 2, None)]
+    3. Сортировать по убыванию: 3, 6, 2, 4
+    4. Такой же для второго начального массива.
+    5. Сопоставление для 3 (потом 6, потом 2, потом 4): n*k
+    6. Обновили current_max.
+    7. После сопоставление 3, можно начальные массивы разделить на две части:
+        до 3 и после 3. Полученные части, если они меньше current_max, то они
+        не используются в дальнейшем расчете.
+    """
+    
     if current_max >= len(arr1) or current_max >= len(arr2):
         return current_max
     if len(arr1) < len(arr2):
@@ -87,6 +101,9 @@ def test():
     arr1, arr2 = get_numbers(line1), get_numbers(line2)
     assert get_length_sequence(arr1, arr2) == 4
 
+    line1, line2 = '1 1 3 1 1 1 1 1 1 1 1 2 4 1 3', '2 2 3 1 1 1 1 1 1 2 4 1 3'
+    arr1, arr2 = get_numbers(line1), get_numbers(line2)
+    assert get_length_sequence(arr1, arr2) == 9
 
 
 def main():
